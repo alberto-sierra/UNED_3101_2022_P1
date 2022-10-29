@@ -1,0 +1,33 @@
+@model IEnumerable<_3101_proyecto1.Models.ConsultorioViewModel>
+
+@{
+    ViewData["Title"] = "Gestión Médica";
+}
+
+<h1>Consultorio</h1>
+
+<p>
+    <a asp-action="Create">Nuevo Consultorio</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Numero)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Numero)
+            </td>
+            <td>
+                <a asp-action="Delete" asp-route-id="@item.Id">Eliminar</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
