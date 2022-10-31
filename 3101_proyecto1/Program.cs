@@ -1,4 +1,10 @@
-﻿var builder = WebApplication.CreateBuilder(args);
+﻿using Microsoft.EntityFrameworkCore;
+using _3101_proyecto1.Entities;
+
+var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddDbContext<citasContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("citasContext") ?? throw new InvalidOperationException("Connection string 'citasContext' not found.")));
+
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
