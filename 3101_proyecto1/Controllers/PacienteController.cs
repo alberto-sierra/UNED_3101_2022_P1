@@ -39,7 +39,8 @@ namespace Backend.Controllers
         {
             if (id == null || _context.Pacientes == null)
             {
-                return NotFound();
+                ViewBag.mensaje = "Paciente no encontrado.";
+                return RedirectToAction(nameof(Index));
             }
 
             var pacienteViewModel = await _context.Pacientes.Select(x => new PacienteViewModel
@@ -52,7 +53,8 @@ namespace Backend.Controllers
             .FirstOrDefaultAsync(m => m.Id == id);
             if (pacienteViewModel == null)
             {
-                return NotFound();
+                ViewBag.mensaje = "Paciente no encontrado.";
+                return RedirectToAction(nameof(Index));
             }
 
             return View(pacienteViewModel);
@@ -201,6 +203,7 @@ namespace Backend.Controllers
             }
             
             await _context.SaveChangesAsync();
+            ViewBag.mensaje = "Registro eliminado con éxito";
             return RedirectToAction(nameof(Index));
         }
 
