@@ -23,8 +23,15 @@ namespace Backend.Controllers
         public async Task<IActionResult> Index()
         {
               return _context.Pacientes != null ? 
-                          View(await _context.Pacientes.ToListAsync()) :
-                          Problem("Entity set 'citasContext.PacienteViewModel'  is null.");
+                          View(await _context.Pacientes.Select(x => new PacienteViewModel
+                          {
+                              Id = x.Id,
+                              Identificacion = x.Identificacion,
+                              NombreCompleto = x.NombreCompleto,
+                              Telefono = x.Telefono
+                          })
+                          .ToListAsync()) :
+                          Problem("Entity set 'citasContext.Pacientes'  is null.");
         }
 
         // GET: Paciente/Details/5
@@ -35,8 +42,14 @@ namespace Backend.Controllers
                 return NotFound();
             }
 
-            var pacienteViewModel = await _context.Pacientes
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var pacienteViewModel = await _context.Pacientes.Select(x => new PacienteViewModel
+            {
+                Id = x.Id,
+                Identificacion = x.Identificacion,
+                NombreCompleto = x.NombreCompleto,
+                Telefono = x.Telefono
+            })
+            .FirstOrDefaultAsync(m => m.Id == id);
             if (pacienteViewModel == null)
             {
                 return NotFound();
@@ -56,11 +69,17 @@ namespace Backend.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Identificacion,NombreCompleto")] PacienteViewModel pacienteViewModel)
+        public async Task<IActionResult> Create([Bind("Id,Identificacion,NombreCompleto,Telefono")] PacienteViewModel pacienteViewModel)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(pacienteViewModel);
+                var paciente = new Paciente
+                {
+                    Identificacion = pacienteViewModel.Identificacion,
+                    NombreCompleto = pacienteViewModel.NombreCompleto,
+                    Telefono = pacienteViewModel.Telefono
+                };
+                _context.Add(paciente);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
@@ -72,14 +91,25 @@ namespace Backend.Controllers
         {
             if (id == null || _context.Pacientes == null)
             {
-                return NotFound();
+                ViewBag.mensaje = "Paciente no encontrado.";
+                return RedirectToAction(nameof(Index));
             }
 
-            var pacienteViewModel = await _context.Pacientes.FindAsync(id);
-            if (pacienteViewModel == null)
+            var paciente = await _context.Pacientes
+            .FindAsync(id);
+            if (paciente == null)
             {
-                return NotFound();
+                ViewBag.mensaje = "Paciente no encontrado.";
+                return RedirectToAction(nameof(Index));
             }
+
+            var pacienteViewModel = new PacienteViewModel
+            {
+                Id = paciente.Id,
+                Identificacion = paciente.Identificacion,
+                NombreCompleto = paciente.NombreCompleto,
+                Telefono = paciente.Telefono
+            };
             return View(pacienteViewModel);
         }
 
@@ -88,7 +118,7 @@ namespace Backend.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(long id, [Bind("Id,Identificacion,NombreCompleto")] PacienteViewModel pacienteViewModel)
+        public async Task<IActionResult> Edit(long id, [Bind("Id,Identificacion,NombreCompleto,Telefono")] PacienteViewModel pacienteViewModel)
         {
             if (id != pacienteViewModel.Id)
             {
@@ -97,16 +127,25 @@ namespace Backend.Controllers
 
             if (ModelState.IsValid)
             {
+                var paciente = new Paciente
+                {
+                    Id = pacienteViewModel.Id,
+                    Identificacion = pacienteViewModel.Identificacion,
+                    NombreCompleto = pacienteViewModel.NombreCompleto,
+                    Telefono = pacienteViewModel.Telefono
+                };
+
                 try
                 {
-                    _context.Update(pacienteViewModel);
+                    _context.Update(paciente);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
                     if (!PacienteViewModelExists(pacienteViewModel.Id))
                     {
-                        return NotFound();
+                        ViewBag.mensaje = "Error al guardar en base de datos.";
+                        return RedirectToAction(nameof(Index));
                     }
                     else
                     {
@@ -123,15 +162,25 @@ namespace Backend.Controllers
         {
             if (id == null || _context.Pacientes == null)
             {
-                return NotFound();
+                ViewBag.mensaje = "Paciente no encontrado.";
+                return RedirectToAction(nameof(Index));
             }
 
-            var pacienteViewModel = await _context.Pacientes
+            var paciente = await _context.Pacientes
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (pacienteViewModel == null)
+            if (paciente == null)
             {
-                return NotFound();
+                ViewBag.mensaje = "Paciente no encontrado.";
+                return RedirectToAction(nameof(Index));
             }
+
+            var pacienteViewModel = new PacienteViewModel
+            {
+                Id = paciente.Id,
+                Identificacion = paciente.Identificacion,
+                NombreCompleto = paciente.NombreCompleto,
+                Telefono = paciente.Telefono
+            };
 
             return View(pacienteViewModel);
         }
@@ -143,12 +192,12 @@ namespace Backend.Controllers
         {
             if (_context.Pacientes == null)
             {
-                return Problem("Entity set 'citasContext.PacienteViewModel'  is null.");
+                return Problem("Entity set 'citasContext.Pacientes'  is null.");
             }
-            var pacienteViewModel = await _context.Pacientes.FindAsync(id);
-            if (pacienteViewModel != null)
+            var paciente = await _context.Pacientes.FindAsync(id);
+            if (paciente != null)
             {
-                _context.Pacientes.Remove(pacienteViewModel);
+                _context.Pacientes.Remove(paciente);
             }
             
             await _context.SaveChangesAsync();

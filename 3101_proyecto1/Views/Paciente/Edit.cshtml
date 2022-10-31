@@ -1,12 +1,11 @@
 @model _3101_proyecto1.Models.PacienteViewModel
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Gestión de Pacientes";
 }
 
-<h1>Edit</h1>
+<h1>Modificar</h1>
 
-<h4>PacienteViewModel</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
@@ -24,7 +23,12 @@
                 <span asp-validation-for="NombreCompleto" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
+                <label asp-for="Telefono" class="control-label"></label>
+                <input asp-for="Telefono" class="form-control" />
+                <span asp-validation-for="Telefono" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Guardar" class="btn btn-primary" />
             </div>
         </form>
     </div>
