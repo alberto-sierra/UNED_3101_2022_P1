@@ -23,8 +23,13 @@ namespace Backend.Controllers
         public async Task<IActionResult> Index()
         {
               return _context.Especialidades != null ? 
-                          View(await _context.Especialidades.ToListAsync()) :
-                          Problem("Entity set 'citasContext.EspecialidadViewModel'  is null.");
+                          View(await _context.Especialidades.Select(x => new EspecialidadViewModel
+                          {
+                              Id = x.Id,
+                              Nombre = x.Nombre,
+                          })
+                          .ToListAsync()) :
+                          Problem("Entity set 'citasContext.Especialidades'  is null.");
         }
 
         // GET: Especialidad/Details/5
@@ -32,14 +37,20 @@ namespace Backend.Controllers
         {
             if (id == null || _context.Especialidades == null)
             {
-                return NotFound();
+                ViewBag.mensaje = "Especialidad no encontrada.";
+                return RedirectToAction(nameof(Index));
             }
 
-            var especialidadViewModel = await _context.Especialidades
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var especialidadViewModel = await _context.Especialidades.Select(x => new EspecialidadViewModel
+            {
+                Id = x.Id,
+                Nombre = x.Nombre
+            })
+            .FirstOrDefaultAsync(m => m.Id == id);
             if (especialidadViewModel == null)
             {
-                return NotFound();
+                ViewBag.mensaje = "Especialidad no encontrada.";
+                return RedirectToAction(nameof(Index));
             }
 
             return View(especialidadViewModel);
@@ -60,7 +71,11 @@ namespace Backend.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Add(especialidadViewModel);
+                var especialidad = new Especialidad
+                {
+                    Nombre = especialidadViewModel.Nombre
+                };
+                _context.Add(especialidad);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
@@ -72,14 +87,22 @@ namespace Backend.Controllers
         {
             if (id == null || _context.Especialidades == null)
             {
-                return NotFound();
+                ViewBag.mensaje = "Especialidad no encontrada.";
+                return RedirectToAction(nameof(Index));
             }
 
-            var especialidadViewModel = await _context.Especialidades.FindAsync(id);
-            if (especialidadViewModel == null)
+            var especialidad = await _context.Especialidades.FindAsync(id);
+            if (especialidad == null)
             {
-                return NotFound();
+                ViewBag.mensaje = "Especialidad no encontrada.";
+                return RedirectToAction(nameof(Index));
             }
+
+            var especialidadViewModel = new EspecialidadViewModel
+            {
+                Id = especialidad.Id,
+                Nombre = especialidad.Nombre
+            };
             return View(especialidadViewModel);
         }
 
@@ -92,21 +115,29 @@ namespace Backend.Controllers
         {
             if (id != especialidadViewModel.Id)
             {
-                return NotFound();
+                ViewBag.mensaje = "Especialidad no encontrada.";
+                return RedirectToAction(nameof(Index));
             }
 
             if (ModelState.IsValid)
             {
+                var especialidad = new Especialidad
+                {
+                    Id = especialidadViewModel.Id,
+                    Nombre = especialidadViewModel.Nombre
+                };
+
                 try
                 {
-                    _context.Update(especialidadViewModel);
+                    _context.Update(especialidad);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
                     if (!EspecialidadViewModelExists(especialidadViewModel.Id))
                     {
-                        return NotFound();
+                        ViewBag.mensaje = "Error al guardar en base de datos.";
+                        return RedirectToAction(nameof(Index));
                     }
                     else
                     {
@@ -123,16 +154,23 @@ namespace Backend.Controllers
         {
             if (id == null || _context.Especialidades == null)
             {
-                return NotFound();
+                ViewBag.mensaje = "Especialidad no encontrada.";
+                return RedirectToAction(nameof(Index));
             }
 
-            var especialidadViewModel = await _context.Especialidades
+            var especialidad = await _context.Especialidades
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (especialidadViewModel == null)
+            if (especialidad == null)
             {
-                return NotFound();
+                ViewBag.mensaje = "Especialidad no encontrada.";
+                return RedirectToAction(nameof(Index));
             }
 
+            var especialidadViewModel = new EspecialidadViewModel
+            {
+                Id = especialidad.Id,
+                Nombre = especialidad.Nombre
+            };
             return View(especialidadViewModel);
         }
 
@@ -143,15 +181,16 @@ namespace Backend.Controllers
         {
             if (_context.Especialidades == null)
             {
-                return Problem("Entity set 'citasContext.EspecialidadViewModel'  is null.");
+                return Problem("Entity set 'citasContext.Especialidades'  is null.");
             }
-            var especialidadViewModel = await _context.Especialidades.FindAsync(id);
-            if (especialidadViewModel != null)
+            var especialidad = await _context.Especialidades.FindAsync(id);
+            if (especialidad != null)
             {
-                _context.Especialidades.Remove(especialidadViewModel);
+                _context.Especialidades.Remove(especialidad);
             }
             
             await _context.SaveChangesAsync();
+            ViewBag.mensaje = "Registro eliminado con éxito";
             return RedirectToAction(nameof(Index));
         }
 
