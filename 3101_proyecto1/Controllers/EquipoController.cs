@@ -19,12 +19,44 @@ namespace Backend.Controllers
             _context = context;
         }
 
+        private List<SelectListItem> getDropDown()
+        {
+            List<SelectListItem> dropDownList = new List<SelectListItem>();
+
+            if (_context.Equipos != null)
+            {
+                dropDownList = _context.Especialidades.Select(x => new SelectListItem
+                {
+                    Value = x.Id.ToString(),
+                    Text = x.Nombre
+                }).ToList();
+
+            }
+
+            return dropDownList;
+        }
+
         // GET: Equipo
         public async Task<IActionResult> Index()
         {
-              return _context.Equipos != null ? 
-                          View(await _context.Equipos.ToListAsync()) :
-                          Problem("Entity set 'citasContext.EquipoViewModel'  is null.");
+            if (_context.Equipos != null)
+            {
+                var dropDown = getDropDown();
+                return View(await _context.Equipos
+                    .Include(x => x.IdEspecialidadNavigation)
+                    .Select(x => new EquipoViewModel
+                {
+                    Id = x.Id,
+                    Nombre = x.Nombre,
+                    IdEspecialidad = x.IdEspecialidad,
+                    NombreEspecialidad = x.IdEspecialidadNavigation.Nombre
+                })
+                .ToListAsync());
+            }
+            else
+            {
+                return Problem("Entity set 'citasContext.Equipo'  is null.");
+            }
         }
 
         // GET: Equipo/Details/5
@@ -32,14 +64,25 @@ namespace Backend.Controllers
         {
             if (id == null || _context.Equipos == null)
             {
-                return NotFound();
+                ViewBag.mensaje = "Equipo no encontrado.";
+                return RedirectToAction(nameof(Index));
             }
 
             var equipoViewModel = await _context.Equipos
+                .Include(x => x.IdEspecialidadNavigation)
+                .Select(x => new EquipoViewModel
+                {
+                    Id = x.Id,
+                    Nombre = x.Nombre,
+                    IdEspecialidad = x.IdEspecialidad,
+                    NombreEspecialidad = x.IdEspecialidadNavigation.Nombre
+                })
                 .FirstOrDefaultAsync(m => m.Id == id);
+
             if (equipoViewModel == null)
             {
-                return NotFound();
+                ViewBag.mensaje = "Equipo no encontrado.";
+                return RedirectToAction(nameof(Index));
             }
 
             return View(equipoViewModel);
@@ -48,7 +91,11 @@ namespace Backend.Controllers
         // GET: Equipo/Create
         public IActionResult Create()
         {
-            return View();
+            var equipoViewModel = new EquipoViewModel
+            {
+                ListaEspecialidad = getDropDown()
+            };
+            return View(equipoViewModel);
         }
 
         // POST: Equipo/Create
@@ -56,11 +103,18 @@ namespace Backend.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Nombre,IdEspecialidad")] EquipoViewModel equipoViewModel)
+        public async Task<IActionResult> Create([Bind("Nombre,IdEspecialidad")] EquipoViewModel equipoViewModel)
         {
+            ModelState.Remove("NombreEspecialidad");
+            ModelState.Remove("ListaEspecialidad");
             if (ModelState.IsValid)
             {
-                _context.Add(equipoViewModel);
+                var equipo = new Equipo
+                {
+                    Nombre = equipoViewModel.Nombre,
+                    IdEspecialidad = equipoViewModel.IdEspecialidad
+                };
+                _context.Add(equipo);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
@@ -72,14 +126,25 @@ namespace Backend.Controllers
         {
             if (id == null || _context.Equipos == null)
             {
-                return NotFound();
+                ViewBag.mensaje = "Equipo no encontrado.";
+                return RedirectToAction(nameof(Index));
             }
 
-            var equipoViewModel = await _context.Equipos.FindAsync(id);
-            if (equipoViewModel == null)
+            var equipo = await _context.Equipos.FindAsync(id);
+            if (equipo == null)
             {
-                return NotFound();
+                ViewBag.mensaje = "Equipo no encontrado.";
+                return RedirectToAction(nameof(Index));
             }
+
+            var equipoViewModel = new EquipoViewModel
+            {
+                Id = equipo.Id,
+                Nombre = equipo.Nombre,
+                IdEspecialidad = equipo.IdEspecialidad,
+                ListaEspecialidad = getDropDown()
+            };
+
             return View(equipoViewModel);
         }
 
@@ -92,21 +157,32 @@ namespace Backend.Controllers
         {
             if (id != equipoViewModel.Id)
             {
-                return NotFound();
+                ViewBag.mensaje = "Equipo no encontrado.";
+                return RedirectToAction(nameof(Index));
             }
 
+            ModelState.Remove("NombreEspecialidad");
+            ModelState.Remove("ListaEspecialidad");
             if (ModelState.IsValid)
             {
+                var equipo = new Equipo
+                {
+                    Id = equipoViewModel.Id,
+                    Nombre = equipoViewModel.Nombre,
+                    IdEspecialidad = equipoViewModel.IdEspecialidad
+                };
+
                 try
                 {
-                    _context.Update(equipoViewModel);
+                    _context.Update(equipo);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
                     if (!EquipoViewModelExists(equipoViewModel.Id))
                     {
-                        return NotFound();
+                        ViewBag.mensaje = "Equipo no encontrado.";
+                        return RedirectToAction(nameof(Index));
                     }
                     else
                     {
@@ -115,6 +191,9 @@ namespace Backend.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+
+            equipoViewModel.ListaEspecialidad = getDropDown();
+
             return View(equipoViewModel);
         }
 
@@ -126,12 +205,22 @@ namespace Backend.Controllers
                 return NotFound();
             }
 
-            var equipoViewModel = await _context.Equipos
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (equipoViewModel == null)
+            var equipo = await _context.Equipos
+            .FirstOrDefaultAsync(m => m.Id == id);
+
+            if (equipo == null)
             {
-                return NotFound();
+                ViewBag.mensaje = "Equipo no encontrado.";
+                return RedirectToAction(nameof(Index));
             }
+
+            var equipoViewModel = new EquipoViewModel
+            {
+                Id = equipo.Id,
+                Nombre = equipo.Nombre,
+                IdEspecialidad = equipo.IdEspecialidad,
+                ListaEspecialidad = getDropDown()
+            };
 
             return View(equipoViewModel);
         }
@@ -143,12 +232,12 @@ namespace Backend.Controllers
         {
             if (_context.Equipos == null)
             {
-                return Problem("Entity set 'citasContext.EquipoViewModel'  is null.");
+                return Problem("Entity set 'citasContext.Equipo'  is null.");
             }
-            var equipoViewModel = await _context.Equipos.FindAsync(id);
-            if (equipoViewModel != null)
+            var equipo = await _context.Equipos.FindAsync(id);
+            if (equipo != null)
             {
-                _context.Equipos.Remove(equipoViewModel);
+                _context.Equipos.Remove(equipo);
             }
             
             await _context.SaveChangesAsync();

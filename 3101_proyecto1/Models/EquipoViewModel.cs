@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Xml.Linq;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace _3101_proyecto1.Models
 {
@@ -17,5 +18,11 @@ namespace _3101_proyecto1.Models
 
         [Required]
         public int IdEspecialidad { get; set; }
+
+        [Display(Name = "Especialidad")]
+        public string NombreEspecialidad { get; set; }
+
+        [NotMapped]
+        public List<SelectListItem> ListaEspecialidad { get; set; }
     }
 }
