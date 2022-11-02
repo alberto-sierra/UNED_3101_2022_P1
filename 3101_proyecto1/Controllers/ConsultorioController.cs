@@ -23,28 +23,14 @@ namespace Backend.Controllers
         public async Task<IActionResult> Index()
         {
               return _context.Consultorios != null ? 
-                          View(await _context.Consultorios.ToListAsync()) :
+                          View(await _context.Consultorios
+                          .Select(x => new ConsultorioViewModel
+                          {
+                              Id = x.Id,
+                              Numero = x.Numero
+                          })
+                          .ToListAsync()) :
                           Problem("Entity set 'citasContext.Consultorios'  is null.");
-        }
-
-        // GET: Consultorio/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null || _context.Consultorios == null)
-            {
-                ViewBag.mensaje = "Consultorio no encontrado.";
-                return RedirectToAction("Index", "Consultorio");
-            }
-
-            var consultorioViewModel = await _context.Consultorios
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (consultorioViewModel == null)
-            {
-                ViewBag.mensaje = "Consultorio no encontrado.";
-                return RedirectToAction("Index", "Consultorio");
-            }
-
-            return View(consultorioViewModel);
         }
 
         // GET: Consultorio/Create
@@ -62,7 +48,11 @@ namespace Backend.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Add(consultorioViewModel);
+                var consultorio = new Consultorio
+                {
+                    Numero = consultorioViewModel.Numero
+                };
+                _context.Add(consultorio);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
@@ -74,14 +64,24 @@ namespace Backend.Controllers
         {
             if (id == null || _context.Consultorios == null)
             {
-                return NotFound();
+                ViewBag.mensaje = "Consultorio no encontrado.";
+                return RedirectToAction(nameof(Index));
             }
 
-            var consultorioViewModel = await _context.Consultorios.FindAsync(id);
-            if (consultorioViewModel == null)
+            var consultorio = await _context.Consultorios.FindAsync(id);
+            
+            if (consultorio == null)
             {
-                return NotFound();
+                ViewBag.mensaje = "Consultorio no encontrado.";
+                return RedirectToAction(nameof(Index));
             }
+
+            var consultorioViewModel = new ConsultorioViewModel
+            {
+                Id = consultorio.Id,
+                Numero = consultorio.Numero
+            };
+
             return View(consultorioViewModel);
         }
 
@@ -94,21 +94,29 @@ namespace Backend.Controllers
         {
             if (id != consultorioViewModel.Id)
             {
-                return NotFound();
+                ViewBag.mensaje = "Consultorio no encontrado.";
+                return RedirectToAction(nameof(Index));
             }
 
             if (ModelState.IsValid)
             {
+                var consultorio = new Consultorio
+                {
+                    Id = consultorioViewModel.Id,
+                    Numero = consultorioViewModel.Numero
+                };
+
                 try
                 {
-                    _context.Update(consultorioViewModel);
+                    _context.Update(consultorio);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
                     if (!ConsultorioViewModelExists(consultorioViewModel.Id))
                     {
-                        return NotFound();
+                        ViewBag.mensaje = "Consultorio no encontrado.";
+                        return RedirectToAction(nameof(Index));
                     }
                     else
                     {
@@ -125,15 +133,23 @@ namespace Backend.Controllers
         {
             if (id == null || _context.Consultorios == null)
             {
-                return NotFound();
+                ViewBag.mensaje = "Consultorio no encontrado.";
+                return RedirectToAction(nameof(Index));
             }
 
-            var consultorioViewModel = await _context.Consultorios
+            var consultorio = await _context.Consultorios
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (consultorioViewModel == null)
+            if (consultorio == null)
             {
-                return NotFound();
+                ViewBag.mensaje = "Consultorio no encontrado.";
+                return RedirectToAction(nameof(Index));
             }
+
+            var consultorioViewModel = new ConsultorioViewModel
+            {
+                Id = consultorio.Id,
+                Numero = consultorio.Numero
+            };
 
             return View(consultorioViewModel);
         }
@@ -147,10 +163,10 @@ namespace Backend.Controllers
             {
                 return Problem("Entity set 'citasContext.ConsultorioViewModel'  is null.");
             }
-            var consultorioViewModel = await _context.Consultorios.FindAsync(id);
-            if (consultorioViewModel != null)
+            var consultorio = await _context.Consultorios.FindAsync(id);
+            if (consultorio != null)
             {
-                _context.Consultorios.Remove(consultorioViewModel);
+                _context.Consultorios.Remove(consultorio);
             }
             
             await _context.SaveChangesAsync();
