@@ -18,6 +18,6 @@ namespace _3101_proyecto1.Entities
 
         [ForeignKey("IdEspecialista")]
         [InverseProperty("EspecialistaDisponibilidads")]
-        public virtual Especialistum IdEspecialistaNavigation { get; set; } = null!;
+        public virtual Especialista IdEspecialistaNavigation { get; set; } = null!;
     }
 }

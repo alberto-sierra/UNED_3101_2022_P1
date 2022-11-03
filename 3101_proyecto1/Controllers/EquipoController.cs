@@ -41,7 +41,6 @@ namespace Backend.Controllers
         {
             if (_context.Equipos != null)
             {
-                var dropDown = getDropDown();
                 return View(await _context.Equipos
                     .Include(x => x.IdEspecialidadNavigation)
                     .Select(x => new EquipoViewModel

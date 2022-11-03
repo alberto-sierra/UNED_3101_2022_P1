@@ -11,7 +11,7 @@ namespace _3101_proyecto1.Entities
     {
         public ReservaConsultorio()
         {
-            Cita = new HashSet<Citum>();
+            Cita = new HashSet<Cita>();
         }
 
         [Key]
@@ -28,8 +28,8 @@ namespace _3101_proyecto1.Entities
         public virtual ConsultorioEquipo IdConsultorioNavigation { get; set; } = null!;
         [ForeignKey("IdEspecialista")]
         [InverseProperty("ReservaConsultorios")]
-        public virtual Especialistum IdEspecialistaNavigation { get; set; } = null!;
+        public virtual Especialista IdEspecialistaNavigation { get; set; } = null!;
         [InverseProperty("IdReservaNavigation")]
-        public virtual ICollection<Citum> Cita { get; set; }
+        public virtual ICollection<Cita> Cita { get; set; }
     }
 }

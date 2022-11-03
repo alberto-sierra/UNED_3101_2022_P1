@@ -12,7 +12,7 @@ namespace _3101_proyecto1.Entities
         public Especialidad()
         {
             Equipos = new HashSet<Equipo>();
-            Especialista = new HashSet<Especialistum>();
+            Especialista = new HashSet<Especialista>();
         }
 
         [Key]
@@ -24,6 +24,6 @@ namespace _3101_proyecto1.Entities
         [InverseProperty("IdEspecialidadNavigation")]
         public virtual ICollection<Equipo> Equipos { get; set; }
         [InverseProperty("IdEspecialidadNavigation")]
-        public virtual ICollection<Especialistum> Especialista { get; set; }
+        public virtual ICollection<Especialista> Especialista { get; set; }
     }
 }

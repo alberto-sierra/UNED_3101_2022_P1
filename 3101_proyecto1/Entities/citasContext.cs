@@ -16,13 +16,13 @@ namespace _3101_proyecto1.Entities
         {
         }
 
-        public virtual DbSet<Citum> Citas { get; set; } = null!;
+        public virtual DbSet<Cita> Cita { get; set; } = null!;
         public virtual DbSet<Consultorio> Consultorios { get; set; } = null!;
         public virtual DbSet<ConsultorioEquipo> ConsultorioEquipos { get; set; } = null!;
         public virtual DbSet<Equipo> Equipos { get; set; } = null!;
         public virtual DbSet<Especialidad> Especialidades { get; set; } = null!;
         public virtual DbSet<EspecialistaDisponibilidad> EspecialistaDisponibilidads { get; set; } = null!;
-        public virtual DbSet<Especialistum> Especialistas { get; set; } = null!;
+        public virtual DbSet<Especialista> Especialista { get; set; } = null!;
         public virtual DbSet<Paciente> Pacientes { get; set; } = null!;
         public virtual DbSet<ReservaConsultorio> ReservaConsultorios { get; set; } = null!;
 
@@ -35,7 +35,7 @@ namespace _3101_proyecto1.Entities
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Citum>(entity =>
+            modelBuilder.Entity<Cita>(entity =>
             {
                 entity.HasOne(d => d.IdPacienteNavigation)
                     .WithMany(p => p.Cita)
@@ -83,7 +83,7 @@ namespace _3101_proyecto1.Entities
                     .HasConstraintName("FK__Especiali__IdEsp__5441852A");
             });
 
-            modelBuilder.Entity<Especialistum>(entity =>
+            modelBuilder.Entity<Especialista>(entity =>
             {
                 entity.HasOne(d => d.IdEspecialidadNavigation)
                     .WithMany(p => p.Especialista)

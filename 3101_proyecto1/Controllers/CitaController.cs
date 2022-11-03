@@ -22,20 +22,20 @@ namespace Backend.Controllers
         // GET: Cita
         public async Task<IActionResult> Index()
         {
-              return _context.Citas != null ? 
-                          View(await _context.Citas.ToListAsync()) :
+              return _context.Cita != null ? 
+                          View(await _context.Cita.ToListAsync()) :
                           Problem("Entity set 'citasContext.CitumViewModel'  is null.");
         }
 
         // GET: Cita/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null || _context.Citas == null)
+            if (id == null || _context.Cita == null)
             {
                 return NotFound();
             }
 
-            var citumViewModel = await _context.Citas
+            var citumViewModel = await _context.Cita
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (citumViewModel == null)
             {
@@ -70,12 +70,12 @@ namespace Backend.Controllers
         // GET: Cita/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null || _context.Citas == null)
+            if (id == null || _context.Cita == null)
             {
                 return NotFound();
             }
 
-            var citumViewModel = await _context.Citas.FindAsync(id);
+            var citumViewModel = await _context.Cita.FindAsync(id);
             if (citumViewModel == null)
             {
                 return NotFound();
@@ -121,12 +121,12 @@ namespace Backend.Controllers
         // GET: Cita/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null || _context.Citas == null)
+            if (id == null || _context.Cita == null)
             {
                 return NotFound();
             }
 
-            var citumViewModel = await _context.Citas
+            var citumViewModel = await _context.Cita
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (citumViewModel == null)
             {
@@ -141,14 +141,14 @@ namespace Backend.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (_context.Citas == null)
+            if (_context.Cita == null)
             {
                 return Problem("Entity set 'citasContext.CitumViewModel'  is null.");
             }
-            var citumViewModel = await _context.Citas.FindAsync(id);
+            var citumViewModel = await _context.Cita.FindAsync(id);
             if (citumViewModel != null)
             {
-                _context.Citas.Remove(citumViewModel);
+                _context.Cita.Remove(citumViewModel);
             }
             
             await _context.SaveChangesAsync();
@@ -157,7 +157,7 @@ namespace Backend.Controllers
 
         private bool CitumViewModelExists(int id)
         {
-          return (_context.Citas?.Any(e => e.Id == id)).GetValueOrDefault();
+          return (_context.Cita?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }
