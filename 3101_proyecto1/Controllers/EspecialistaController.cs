@@ -19,28 +19,74 @@ namespace Backend.Controllers
             _context = context;
         }
 
+        private List<SelectListItem> getDropDown()
+        {
+            List<SelectListItem> dropDownList = new List<SelectListItem>();
+
+            if (_context.Especialista != null)
+            {
+                dropDownList = _context.Especialidades.Select(x => new SelectListItem
+                {
+                    Value = x.Id.ToString(),
+                    Text = x.Nombre
+                }).ToList();
+
+            }
+
+            return dropDownList;
+        }
+
         // GET: Especialista
         public async Task<IActionResult> Index()
         {
-              return _context.Especialistas != null ? 
-                          View(await _context.Especialistas.ToListAsync()) :
-                          Problem("Entity set 'citasContext.EspecialistumViewModel'  is null.");
+            if (_context.Especialista != null)
+            {
+                return View(await _context.Especialista
+                    .Include(x => x.IdEspecialidadNavigation)
+                    .Select(x => new EspecialistumViewModel
+                    {
+                        Id = x.Id,
+                        Nombre = x.Nombre,
+                        PrecioConsulta = x.PrecioConsulta,
+                        IdEspecialidad = x.IdEspecialidad,
+                        NombreEspecialidad = x.IdEspecialidadNavigation.Nombre
+                    })
+                .ToListAsync());
+            }
+            else
+            {
+                return Problem("Entity set 'citasContext.Equipo'  is null.");
+            }
         }
 
         // GET: Especialista/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null || _context.Especialistas == null)
+            if (id == null || _context.Especialista == null)
             {
-                return NotFound();
+                ViewBag.mensaje = "Especialista no encontrado.";
+                return RedirectToAction(nameof(Index));
             }
 
-            var especialistumViewModel = await _context.Especialistas
+            var especialistumViewModel = await _context.Especialista
+                .Include(x => x.IdEspecialidadNavigation)
+                .Select(x => new EspecialistumViewModel
+                {
+                    Id = x.Id,
+                    Nombre = x.Nombre,
+                    Identificacion = x.Identificacion,
+                    PrecioConsulta = x.PrecioConsulta,
+                    IdEspecialidad = x.IdEspecialidad,
+                    NombreEspecialidad = x.IdEspecialidadNavigation.Nombre
+                })
                 .FirstOrDefaultAsync(m => m.Id == id);
+            
             if (especialistumViewModel == null)
             {
-                return NotFound();
+                ViewBag.mensaje = "Especialista no encontrado.";
+                return RedirectToAction(nameof(Index));
             }
+
 
             return View(especialistumViewModel);
         }
@@ -48,7 +94,11 @@ namespace Backend.Controllers
         // GET: Especialista/Create
         public IActionResult Create()
         {
-            return View();
+            var especialistumViewModel = new EspecialistumViewModel
+            {
+                ListaEspecialidad = getDropDown()
+            };
+            return View(especialistumViewModel);
         }
 
         // POST: Especialista/Create
@@ -56,11 +106,20 @@ namespace Backend.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Nombre,PrecioConsulta,IdEspecialidad")] EspecialistumViewModel especialistumViewModel)
+        public async Task<IActionResult> Create([Bind("Id,Nombre,Identificacion,PrecioConsulta,IdEspecialidad")] EspecialistumViewModel especialistumViewModel)
         {
+            ModelState.Remove("NombreEspecialidad");
+            ModelState.Remove("ListaEspecialidad");
             if (ModelState.IsValid)
             {
-                _context.Add(especialistumViewModel);
+                var especialista = new Especialista
+                {
+                    Nombre = especialistumViewModel.Nombre,
+                    Identificacion = especialistumViewModel.Identificacion,
+                    PrecioConsulta = especialistumViewModel.PrecioConsulta,
+                    IdEspecialidad = especialistumViewModel.IdEspecialidad
+                };
+                _context.Add(especialista);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
@@ -70,16 +129,33 @@ namespace Backend.Controllers
         // GET: Especialista/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null || _context.Especialistas == null)
+            if (id == null || _context.Especialista == null)
             {
-                return NotFound();
+                ViewBag.mensaje = "Especialista no encontrado.";
+                return RedirectToAction(nameof(Index));
             }
 
-            var especialistumViewModel = await _context.Especialistas.FindAsync(id);
+            var especialistumViewModel = await _context.Especialista
+                .Include(x => x.IdEspecialidadNavigation)
+                .Select(x => new EspecialistumViewModel
+                {
+                    Id = x.Id,
+                    Nombre = x.Nombre,
+                    Identificacion = x.Identificacion,
+                    IdEspecialidad = x.IdEspecialidad,
+                    PrecioConsulta = x.PrecioConsulta,
+                    NombreEspecialidad = x.IdEspecialidadNavigation.Nombre
+                })
+                .FirstOrDefaultAsync(m => m.Id == id);
+
             if (especialistumViewModel == null)
             {
-                return NotFound();
+                ViewBag.mensaje = "Especialista no encontrado.";
+                return RedirectToAction(nameof(Index));
             }
+
+            especialistumViewModel.ListaEspecialidad = getDropDown();
+
             return View(especialistumViewModel);
         }
 
@@ -88,25 +164,38 @@ namespace Backend.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Nombre,PrecioConsulta,IdEspecialidad")] EspecialistumViewModel especialistumViewModel)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Nombre,Identificacion,PrecioConsulta,IdEspecialidad")] EspecialistumViewModel especialistumViewModel)
         {
             if (id != especialistumViewModel.Id)
             {
-                return NotFound();
+                ViewBag.mensaje = "Especialista no encontrado.";
+                return RedirectToAction(nameof(Index));
             }
 
+            ModelState.Remove("NombreEspecialidad");
+            ModelState.Remove("ListaEspecialidad");
             if (ModelState.IsValid)
             {
+                var especialista = new Especialista
+                {
+                    Id = especialistumViewModel.Id,
+                    Nombre = especialistumViewModel.Nombre,
+                    Identificacion = especialistumViewModel.Identificacion,
+                    PrecioConsulta = especialistumViewModel.PrecioConsulta,
+                    IdEspecialidad = especialistumViewModel.IdEspecialidad
+                };
+
                 try
                 {
-                    _context.Update(especialistumViewModel);
+                    _context.Update(especialista);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
                     if (!EspecialistumViewModelExists(especialistumViewModel.Id))
                     {
-                        return NotFound();
+                        ViewBag.mensaje = "Especialista no encontrado.";
+                        return RedirectToAction(nameof(Index));
                     }
                     else
                     {
@@ -115,23 +204,36 @@ namespace Backend.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+
+            especialistumViewModel.ListaEspecialidad = getDropDown();
+
             return View(especialistumViewModel);
         }
 
         // GET: Especialista/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null || _context.Especialistas == null)
+            if (id == null || _context.Especialista == null)
             {
-                return NotFound();
+                ViewBag.mensaje = "Especialista no encontrado.";
+                return RedirectToAction(nameof(Index));
             }
 
-            var especialistumViewModel = await _context.Especialistas
+            var especialista = await _context.Especialista
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (especialistumViewModel == null)
+            if (especialista == null)
             {
-                return NotFound();
+                ViewBag.mensaje = "Especialista no encontrado.";
+                return RedirectToAction(nameof(Index));
             }
+
+            var especialistumViewModel = new EspecialistumViewModel
+            {
+                Id = especialista.Id,
+                Nombre = especialista.Nombre,
+                Identificacion = especialista.Identificacion,
+                PrecioConsulta = especialista.PrecioConsulta
+            };
 
             return View(especialistumViewModel);
         }
@@ -141,14 +243,14 @@ namespace Backend.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (_context.Especialistas == null)
+            if (_context.Especialista == null)
             {
                 return Problem("Entity set 'citasContext.EspecialistumViewModel'  is null.");
             }
-            var especialistumViewModel = await _context.Especialistas.FindAsync(id);
-            if (especialistumViewModel != null)
+            var especialista = await _context.Especialista.FindAsync(id);
+            if (especialista != null)
             {
-                _context.Especialistas.Remove(especialistumViewModel);
+                _context.Especialista.Remove(especialista);
             }
             
             await _context.SaveChangesAsync();
@@ -157,7 +259,7 @@ namespace Backend.Controllers
 
         private bool EspecialistumViewModelExists(int id)
         {
-          return (_context.Especialistas?.Any(e => e.Id == id)).GetValueOrDefault();
+          return (_context.Especialista?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }

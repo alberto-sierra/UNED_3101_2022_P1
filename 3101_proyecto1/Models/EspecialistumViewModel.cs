@@ -17,12 +17,19 @@ namespace _3101_proyecto1.Models
         public string Nombre { get; set; } = null!;
 
         [Required]
+        [Display(Name = "Identificación")]
+        public string Identificacion { get; set; }
+
+        [Required]
         [Display(Name = "Precio de la Consulta")]
         [Column(TypeName = "money")]
         public decimal PrecioConsulta { get; set; }
 
         [Required]
         public int IdEspecialidad { get; set; }
+
+        [Display(Name = "Especialidad")]
+        public string NombreEspecialidad { get; set; }
 
         [NotMapped]
         public List<SelectListItem> ListaEspecialidad { get; set; }
