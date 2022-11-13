@@ -59,7 +59,7 @@ namespace _3101_proyecto1.Models
         public string NumeroConsultorio { get; set; }
 
         [NotMapped]
-        [Display(Name = "Equipo")]
+        [Display(Name = "Equipo Médico")]
         public string NombreEquipo { get; set; }
 
     }
