@@ -1,9 +1,8 @@
-﻿using _3101_proyecto1.Data;
+﻿using _3101_proyecto1.Api.Data;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddDbContext<APIContext>(options =>
+builder.Services.AddDbContext<ApiContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("citasContext") ?? throw new InvalidOperationException("Connection string 'citasContext' not found.")));
 
 // Add services to the container.

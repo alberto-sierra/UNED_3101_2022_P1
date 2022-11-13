@@ -4,9 +4,9 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
-namespace _3101_proyecto1.Entities
+namespace _3101_proyecto1.Api.Entities
 {
-    public partial class Cita
+    public partial class Citum
     {
         [Key]
         public int Id { get; set; }

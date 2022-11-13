@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
-namespace _3101_proyecto1.Entities
+namespace _3101_proyecto1.Api.Entities
 {
     [Table("Especialidad")]
     public partial class Especialidad
@@ -12,7 +12,7 @@ namespace _3101_proyecto1.Entities
         public Especialidad()
         {
             Equipos = new HashSet<Equipo>();
-            Especialista = new HashSet<Especialista>();
+            Especialista = new HashSet<Especialistum>();
         }
 
         [Key]
@@ -24,6 +24,6 @@ namespace _3101_proyecto1.Entities
         [InverseProperty("IdEspecialidadNavigation")]
         public virtual ICollection<Equipo> Equipos { get; set; }
         [InverseProperty("IdEspecialidadNavigation")]
-        public virtual ICollection<Especialista> Especialista { get; set; }
+        public virtual ICollection<Especialistum> Especialista { get; set; }
     }
 }

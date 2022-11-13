@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
-namespace _3101_proyecto1.Entities
+namespace _3101_proyecto1.Api.Entities
 {
     [Table("Paciente")]
     [Index("Identificacion", Name = "UQ__Paciente__D6F931E57485B694", IsUnique = true)]
@@ -12,7 +12,7 @@ namespace _3101_proyecto1.Entities
     {
         public Paciente()
         {
-            Cita = new HashSet<Cita>();
+            Cita = new HashSet<Citum>();
         }
 
         [Key]
@@ -28,6 +28,6 @@ namespace _3101_proyecto1.Entities
         public string NombreCompleto { get; set; } = null!;
 
         [InverseProperty("IdPacienteNavigation")]
-        public virtual ICollection<Cita> Cita { get; set; }
+        public virtual ICollection<Citum> Cita { get; set; }
     }
 }

@@ -4,14 +4,13 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
-namespace _3101_proyecto1.Entities
+namespace _3101_proyecto1.Api.Entities
 {
     [Index("Identificacion", Name = "UQ__Especial__D6F931E5DC511E7C", IsUnique = true)]
-    public partial class Especialista
+    public partial class Especialistum
     {
-        public Especialista()
+        public Especialistum()
         {
-            EspecialistaDisponibilidads = new HashSet<EspecialistaDisponibilidad>();
             ReservaConsultorios = new HashSet<ReservaConsultorio>();
         }
 
@@ -30,8 +29,6 @@ namespace _3101_proyecto1.Entities
         [ForeignKey("IdEspecialidad")]
         [InverseProperty("Especialista")]
         public virtual Especialidad IdEspecialidadNavigation { get; set; } = null!;
-        [InverseProperty("IdEspecialistaNavigation")]
-        public virtual ICollection<EspecialistaDisponibilidad> EspecialistaDisponibilidads { get; set; }
         [InverseProperty("IdEspecialistaNavigation")]
         public virtual ICollection<ReservaConsultorio> ReservaConsultorios { get; set; }
     }

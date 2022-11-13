@@ -21,8 +21,12 @@
     <None Remove="Microsoft.EntityFrameworkCore" />
     <None Remove="Microsoft.EntityFrameworkCore.Design" />
     <None Remove="Microsoft.EntityFrameworkCore.SqlServer" />
+    <None Remove="Entitites\" />
+    <None Remove="Models\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Data\" />
+    <Folder Include="Entitites\" />
+    <Folder Include="Models\" />
   </ItemGroup>
 </Project>
