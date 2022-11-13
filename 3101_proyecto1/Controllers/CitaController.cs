@@ -23,8 +23,16 @@ namespace Backend.Controllers
         public async Task<IActionResult> Index()
         {
               return _context.Cita != null ? 
-                          View(await _context.Cita.ToListAsync()) :
-                          Problem("Entity set 'citasContext.CitumViewModel'  is null.");
+                          View(await _context.Cita.Select(x => new CitumViewModel
+                          {
+                              Id = x.Id,
+                              IdPaciente = x.IdPaciente,
+                              IdReserva = x.IdReserva,
+                              Fecha = x.Fecha,
+                              HoraInicio = x.HoraInicio
+                          })
+                          .ToListAsync()) :
+                          Problem("Entity set 'citasContext.Citum'  is null.");
         }
 
         // GET: Cita/Details/5
@@ -143,7 +151,7 @@ namespace Backend.Controllers
         {
             if (_context.Cita == null)
             {
-                return Problem("Entity set 'citasContext.CitumViewModel'  is null.");
+                return Problem("Entity set 'citasContext.Citum'  is null.");
             }
             var citumViewModel = await _context.Cita.FindAsync(id);
             if (citumViewModel != null)

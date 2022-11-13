@@ -112,7 +112,7 @@ namespace Backend.Controllers
             ModelState.Remove("ListaEspecialidad");
             if (ModelState.IsValid)
             {
-                var especialista = new Especialista
+                var especialista = new Especialistum
                 {
                     Nombre = especialistumViewModel.Nombre,
                     Identificacion = especialistumViewModel.Identificacion,
@@ -176,7 +176,7 @@ namespace Backend.Controllers
             ModelState.Remove("ListaEspecialidad");
             if (ModelState.IsValid)
             {
-                var especialista = new Especialista
+                var especialista = new Especialistum
                 {
                     Id = especialistumViewModel.Id,
                     Nombre = especialistumViewModel.Nombre,
