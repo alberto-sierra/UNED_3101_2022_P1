@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace _3101_proyecto1.Entities
 {
-    public partial class Cita
+    public partial class Citum
     {
         [Key]
         public int Id { get; set; }

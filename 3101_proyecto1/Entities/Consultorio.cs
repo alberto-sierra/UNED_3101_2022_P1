@@ -11,7 +11,7 @@ namespace _3101_proyecto1.Entities
     {
         public Consultorio()
         {
-            ConsultorioEquipos = new HashSet<ConsultorioEquipo>();
+            ReservaConsultorios = new HashSet<ReservaConsultorio>();
         }
 
         [Key]
@@ -19,6 +19,6 @@ namespace _3101_proyecto1.Entities
         public int Numero { get; set; }
 
         [InverseProperty("IdConsultorioNavigation")]
-        public virtual ICollection<ConsultorioEquipo> ConsultorioEquipos { get; set; }
+        public virtual ICollection<ReservaConsultorio> ReservaConsultorios { get; set; }
     }
 }

@@ -12,7 +12,7 @@ namespace _3101_proyecto1.Entities
     {
         public Paciente()
         {
-            Cita = new HashSet<Cita>();
+            Cita = new HashSet<Citum>();
         }
 
         [Key]
@@ -28,6 +28,6 @@ namespace _3101_proyecto1.Entities
         public string NombreCompleto { get; set; } = null!;
 
         [InverseProperty("IdPacienteNavigation")]
-        public virtual ICollection<Cita> Cita { get; set; }
+        public virtual ICollection<Citum> Cita { get; set; }
     }
 }

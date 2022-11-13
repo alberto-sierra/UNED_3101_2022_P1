@@ -16,13 +16,11 @@ namespace _3101_proyecto1.Entities
         {
         }
 
-        public virtual DbSet<Cita> Cita { get; set; } = null!;
+        public virtual DbSet<Citum> Cita { get; set; } = null!;
         public virtual DbSet<Consultorio> Consultorios { get; set; } = null!;
-        public virtual DbSet<ConsultorioEquipo> ConsultorioEquipos { get; set; } = null!;
         public virtual DbSet<Equipo> Equipos { get; set; } = null!;
         public virtual DbSet<Especialidad> Especialidades { get; set; } = null!;
-        public virtual DbSet<EspecialistaDisponibilidad> EspecialistaDisponibilidads { get; set; } = null!;
-        public virtual DbSet<Especialista> Especialista { get; set; } = null!;
+        public virtual DbSet<Especialistum> Especialista { get; set; } = null!;
         public virtual DbSet<Paciente> Pacientes { get; set; } = null!;
         public virtual DbSet<ReservaConsultorio> ReservaConsultorios { get; set; } = null!;
 
@@ -35,7 +33,7 @@ namespace _3101_proyecto1.Entities
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Cita>(entity =>
+            modelBuilder.Entity<Citum>(entity =>
             {
                 entity.HasOne(d => d.IdPacienteNavigation)
                     .WithMany(p => p.Cita)
@@ -50,21 +48,6 @@ namespace _3101_proyecto1.Entities
                     .HasConstraintName("FK__Cita__IdReserva__628FA481");
             });
 
-            modelBuilder.Entity<ConsultorioEquipo>(entity =>
-            {
-                entity.HasOne(d => d.IdConsultorioNavigation)
-                    .WithMany(p => p.ConsultorioEquipos)
-                    .HasForeignKey(d => d.IdConsultorio)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Consultor__IdCon__59FA5E80");
-
-                entity.HasOne(d => d.IdEquipoNavigation)
-                    .WithMany(p => p.ConsultorioEquipos)
-                    .HasForeignKey(d => d.IdEquipo)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Consultor__IdEqu__5AEE82B9");
-            });
-
             modelBuilder.Entity<Equipo>(entity =>
             {
                 entity.HasOne(d => d.IdEspecialidadNavigation)
@@ -74,16 +57,7 @@ namespace _3101_proyecto1.Entities
                     .HasConstraintName("FK__Equipo__IdEspeci__571DF1D5");
             });
 
-            modelBuilder.Entity<EspecialistaDisponibilidad>(entity =>
-            {
-                entity.HasOne(d => d.IdEspecialistaNavigation)
-                    .WithMany(p => p.EspecialistaDisponibilidads)
-                    .HasForeignKey(d => d.IdEspecialista)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Especiali__IdEsp__5441852A");
-            });
-
-            modelBuilder.Entity<Especialista>(entity =>
+            modelBuilder.Entity<Especialistum>(entity =>
             {
                 entity.HasOne(d => d.IdEspecialidadNavigation)
                     .WithMany(p => p.Especialista)
@@ -98,7 +72,13 @@ namespace _3101_proyecto1.Entities
                     .WithMany(p => p.ReservaConsultorios)
                     .HasForeignKey(d => d.IdConsultorio)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__ReservaCo__IdCon__5EBF139D");
+                    .HasConstraintName("FK__ReservaCo__IdCon__01142BA1");
+
+                entity.HasOne(d => d.IdEquipoNavigation)
+                    .WithMany(p => p.ReservaConsultorios)
+                    .HasForeignKey(d => d.IdEquipo)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__ReservaCo__IdEqu__6E01572D");
 
                 entity.HasOne(d => d.IdEspecialistaNavigation)
                     .WithMany(p => p.ReservaConsultorios)
