@@ -13,6 +13,7 @@ namespace Backend.Controllers
     public class ReservaConsultorioController : Controller
     {
         private readonly citasContext _context;
+        private readonly string[] horasPublico = { "0800", "0830", "0900", "0930", "1000", "1030", "1100", "1130", "1330", "1400", "1430", "1500", "1530", "1600", "1630" };
 
         public ReservaConsultorioController(citasContext context)
         {
@@ -22,9 +23,32 @@ namespace Backend.Controllers
         // GET: ReservaConsultorio
         public async Task<IActionResult> Index()
         {
-              return _context.ReservaConsultorios != null ? 
-                          View(await _context.ReservaConsultorios.ToListAsync()) :
-                          Problem("Entity set 'citasContext.ReservaConsultorioViewModel'  is null.");
+            if (_context.ReservaConsultorios != null)
+            {
+                return View(await _context.ReservaConsultorios
+                          .Include(x => x.IdConsultorioNavigation)
+                          .Include(x => x.IdEquipoNavigation)
+                          .Include(x => x.IdEspecialistaNavigation)
+                          .Select(x => new ReservaConsultorioViewModel
+                          {
+                              IdConsultorio = x.IdConsultorio,
+                              IdEquipo = x.IdEquipo,
+                              IdEspecialista = x.IdEspecialista,
+                              DiaSemana = x.DiaSemana,
+                              HoraInicio = x.HoraInicio,
+                              HoraFinal = x.HoraFinal,
+                              Disponible = x.Disponible,
+                              NombreEquipo = x.IdEquipoNavigation.Nombre,
+                              NombreEspecialista = x.IdEspecialistaNavigation.Nombre,
+                              NumeroConsultorio = x.IdConsultorioNavigation.Numero.ToString()
+                          })
+                          .ToListAsync());
+            }
+            else
+            {
+                return Problem("Entity set 'citasContext.ReservaConsultorios'  is null.");
+            }
+                          
         }
 
         // GET: ReservaConsultorio/Details/5
@@ -32,23 +56,65 @@ namespace Backend.Controllers
         {
             if (id == null || _context.ReservaConsultorios == null)
             {
-                return NotFound();
+                ViewBag.mensaje = "Reserva no encontrada.";
+                return RedirectToAction(nameof(Index));
             }
 
-            var reservaConsultorioViewModel = await _context.ReservaConsultorios
+            var reservaConsultorio = await _context.ReservaConsultorios
+                .Include(x => x.IdConsultorioNavigation)
+                .Include(x => x.IdEquipoNavigation)
+                .Include(x => x.IdEspecialistaNavigation)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (reservaConsultorioViewModel == null)
+            if (reservaConsultorio == null)
             {
-                return NotFound();
+                ViewBag.mensaje = "Reserva no encontrada.";
+                return RedirectToAction(nameof(Index));
             }
+
+            var reservaConsultorioViewModel = new ReservaConsultorioViewModel
+            {
+                Id = reservaConsultorio.Id,
+                IdConsultorio = reservaConsultorio.IdConsultorio,
+                IdEquipo =  reservaConsultorio.IdEquipo,
+                IdEspecialista = reservaConsultorio.IdEspecialista,
+                HoraInicio = reservaConsultorio.HoraInicio,
+                HoraFinal = reservaConsultorio.HoraFinal,
+                DiaSemana = reservaConsultorio.DiaSemana,
+                Disponible = reservaConsultorio.Disponible,
+                NombreEquipo = reservaConsultorio.IdEquipoNavigation.Nombre,
+                NombreEspecialista = reservaConsultorio.IdEspecialistaNavigation.Nombre,
+                NumeroConsultorio = reservaConsultorio.IdConsultorioNavigation.Numero.ToString()
+            };
 
             return View(reservaConsultorioViewModel);
         }
 
         // GET: ReservaConsultorio/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            return View();
+            List<SelectListItem> dropDownList = new List<SelectListItem>();
+            var consultorios = new List<ConsultorioViewModel>();
+
+            if (_context.Consultorios != null)
+            {
+                dropDownList = await _context.Consultorios
+                .Select(x => new SelectListItem
+                {
+                    Value = x.Id.ToString(),
+                    Text = x.Numero.ToString()
+                }).ToListAsync();
+            }
+            else
+            {
+                return Problem("Entity set 'citasContext.Consultorios'  is null.");
+            }
+
+            var reservaConsultorioViewModel = new ReservaConsultorioViewModel
+            {
+                ListaItems = dropDownList
+            };
+
+            return View(reservaConsultorioViewModel);
         }
 
         // POST: ReservaConsultorio/Create
@@ -56,15 +122,193 @@ namespace Backend.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,IdEspecialista,IdConsultorio,HoraInicio,DiaSemana,Disponible")] ReservaConsultorioViewModel reservaConsultorioViewModel)
+        public async Task<IActionResult> Create([Bind("IdConsultorio")] ReservaConsultorioViewModel reservaViewModel)
         {
+
+            var horasDisponibles = horasPublico;
+
+            if (_context.ReservaConsultorios != null)
+            {
+
+                var reservas = await _context.ReservaConsultorios
+                .Where(x => x.IdConsultorio == reservaViewModel.IdConsultorio)
+                .Select(x => new ReservaConsultorioViewModel
+                {
+                    IdConsultorio = x.IdConsultorio,
+                    HoraInicio = x.HoraInicio
+                })
+                .ToListAsync();
+
+                foreach (var item in reservas)
+                {
+                    var horaReserva = item.HoraInicio.Hours.ToString("D2") + item.HoraInicio.Minutes.ToString("D2");
+                    horasDisponibles = horasDisponibles.Where(x => x != horaReserva).ToArray();
+                }
+
+            }
+            else
+            {
+                return Problem("Entity set 'citasContext.ReservaConsultorios'  is null.");
+            }
+
+            var horasDropdown = horasDisponibles.Select(x => new SelectListItem
+            {
+                Value = x.ToString(),
+                Text = $"{x.Substring(0, 2)}:{x.Substring(2)}"
+            }).ToList();
+
+            reservaViewModel.ListaItems = horasDropdown;
+            var numConsultorio = await _context.Consultorios
+                .Where(x => x.Id == reservaViewModel.IdConsultorio)
+                .Select(x => x.Numero)
+                .FirstAsync();
+            reservaViewModel.NumeroConsultorio = numConsultorio.ToString();
+
+            return View("Create2", reservaViewModel);
+        }
+
+        // POST: ReservaConsultorio/Create2
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create2([Bind("IdConsultorio,NumeroConsultorio,HoraSeleccionada")] ReservaConsultorioViewModel reservaViewModel)
+        {
+
+            try
+            {
+                var hora = int.Parse(reservaViewModel.HoraSeleccionada.ToString().Substring(0, 2));
+                var minuto = int.Parse(reservaViewModel.HoraSeleccionada.ToString().Substring(2));
+                var horaReserva = new TimeSpan(hora, minuto, 0);
+                reservaViewModel.HoraInicio = horaReserva;
+            }
+            catch (Exception ex)
+            {
+                ViewBag.mensaje = "Formato de hora incorrecto.";
+                return RedirectToAction(nameof(Create));
+            }
+
+            List<SelectListItem> dropDownList = new List<SelectListItem>();
+            var horaSeleccionada = reservaViewModel.HoraInicio;
+
+            if (_context.ReservaConsultorios != null)
+            {
+
+                var especialistas = await _context.Especialista
+                    .Select(x => new
+                    {
+                        Id = x.Id,
+                        Nombre = x.Nombre
+                    })
+                    .ToListAsync();
+                    
+                var reservas = await _context.ReservaConsultorios
+                    .Where(x => x.HoraInicio == reservaViewModel.HoraInicio)
+                    .Select(x => new
+                    {
+                        IdEspecialista = x.IdEspecialista
+                    })
+                    .ToListAsync();
+
+
+                foreach (var especialista in especialistas)
+                {
+                    var agregar = true;
+                    foreach (var reserva in reservas)
+                    {
+                        if (reserva.IdEspecialista == especialista.Id)
+                        {
+                            agregar = false;
+                        }
+                    }
+
+                    if (agregar)
+                    {
+                        dropDownList.Add(new SelectListItem
+                        {
+                            Value = especialista.Id.ToString(),
+                            Text = especialista.Nombre
+                        });
+                    }
+                    
+                }
+
+                reservaViewModel.ListaItems = dropDownList;
+                return View("Create3", reservaViewModel);
+            }
+            else
+            {
+                return Problem("Entity set 'citasContext.ReservaConsultorios'  is null.");
+            }
+
+        }
+
+        // POST: ReservaConsultorio/Create3
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create3([Bind("IdConsultorio,NumeroConsultorio,HoraInicio,IdEspecialista")] ReservaConsultorioViewModel reservaViewModel)
+        {
+            if (_context.Equipos != null)
+            {
+
+                var equipos = await _context.Equipos
+                .Join(_context.Especialista,
+                    eq => eq.IdEspecialidad,
+                    es => es.IdEspecialidad,
+                    (eq, es) => new
+                    {
+                        Id = eq.Id,
+                        Nombre =  eq.Nombre,
+                        IdEspecialista = es.Id,
+                        NombreEspecialista = es.Nombre
+                    }
+                )
+                .Where(x => x.IdEspecialista == reservaViewModel.IdEspecialista)
+                .Distinct()
+                .Select(y => new SelectListItem
+                {
+                    Value = y.Id.ToString(),
+                    Text = y.Nombre
+                })
+                .ToListAsync();
+
+                reservaViewModel.ListaItems = equipos;
+
+                return View("create4", reservaViewModel);
+            }
+            else
+            {
+                return Problem("Entity set 'citasContext.ReservaConsultorios'  is null.");
+            }
+
+        }
+
+        // POST: ReservaConsultorio/Create4
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create4([Bind("IdConsultorio,HoraInicio,IdEspecialista,IdEquipo")] ReservaConsultorioViewModel reservaViewModel)
+        {
+            ModelState.Remove("ListaItems");
+            ModelState.Remove("NombreEquipo");
+            ModelState.Remove("NombreEspecialista");
+            ModelState.Remove("HoraSeleccionada");
             if (ModelState.IsValid)
             {
-                _context.Add(reservaConsultorioViewModel);
+                var fecha = new DateTime();
+                var reservaConsultorio = new ReservaConsultorio
+                {
+                    IdConsultorio = reservaViewModel.IdConsultorio,
+                    IdEquipo = reservaViewModel.IdEquipo,
+                    IdEspecialista = reservaViewModel.IdEspecialista,
+                    HoraInicio = reservaViewModel.HoraInicio,
+                    HoraFinal = reservaViewModel.HoraInicio.Add(new TimeSpan(0, 30, 0)),
+                    DiaSemana = ((byte)fecha.DayOfWeek),
+                    Disponible = false,
+                };
+                _context.Add(reservaConsultorio);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(reservaConsultorioViewModel);
+
+            return View(reservaViewModel);
         }
 
         // GET: ReservaConsultorio/Edit/5
@@ -72,13 +316,15 @@ namespace Backend.Controllers
         {
             if (id == null || _context.ReservaConsultorios == null)
             {
-                return NotFound();
+                ViewBag.mensaje = "Reserva no encontrada.";
+                return RedirectToAction(nameof(Index));
             }
 
             var reservaConsultorioViewModel = await _context.ReservaConsultorios.FindAsync(id);
             if (reservaConsultorioViewModel == null)
             {
-                return NotFound();
+                ViewBag.mensaje = "Reserva no encontrada.";
+                return RedirectToAction(nameof(Index));
             }
             return View(reservaConsultorioViewModel);
         }
@@ -92,7 +338,8 @@ namespace Backend.Controllers
         {
             if (id != reservaConsultorioViewModel.Id)
             {
-                return NotFound();
+                ViewBag.mensaje = "Reserva no encontrada.";
+                return RedirectToAction(nameof(Index));
             }
 
             if (ModelState.IsValid)
@@ -106,7 +353,8 @@ namespace Backend.Controllers
                 {
                     if (!ReservaConsultorioViewModelExists(reservaConsultorioViewModel.Id))
                     {
-                        return NotFound();
+                        ViewBag.mensaje = "Reserva no encontrada.";
+                        return RedirectToAction(nameof(Index));
                     }
                     else
                     {
@@ -123,14 +371,16 @@ namespace Backend.Controllers
         {
             if (id == null || _context.ReservaConsultorios == null)
             {
-                return NotFound();
+                ViewBag.mensaje = "Reserva no encontrada.";
+                return RedirectToAction(nameof(Index));
             }
 
             var reservaConsultorioViewModel = await _context.ReservaConsultorios
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (reservaConsultorioViewModel == null)
             {
-                return NotFound();
+                ViewBag.mensaje = "Reserva no encontrada.";
+                return RedirectToAction(nameof(Index));
             }
 
             return View(reservaConsultorioViewModel);
