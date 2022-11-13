@@ -5,8 +5,11 @@
 }
 
 <h1>Modificar Consultorio @Html.DisplayFor(Model => Model.Numero)</h1>
+@if (ViewBag.mensaje != null)
+{
+    <h4 class="danger">@ViewBag.mensaje</h4>
+}
 
-<h4>ConsultorioViewModel</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">

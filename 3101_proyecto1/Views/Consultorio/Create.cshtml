@@ -5,6 +5,10 @@
 }
 
 <h4>Crear Consultorio</h4>
+@if (ViewBag.mensaje != null)
+{
+    <h4 class="danger">@ViewBag.mensaje</h4>
+}
 <hr />
 <div class="row">
     <div class="col-md-4">

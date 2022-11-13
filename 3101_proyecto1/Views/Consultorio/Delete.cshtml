@@ -4,20 +4,22 @@
     ViewData["Title"] = "Gestión de Consultorios";
 }
 
-
 <h3>Confirmación</h3>
+@if (ViewBag.mensaje != null)
+{
+    <h4 class="danger">@ViewBag.mensaje</h4>
+}
 <div>
-    <h4>ConsultorioViewModel</h4>
     <hr />
     <dl class="row">
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Numero)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Numero)
         </dd>
     </dl>
-    
+
     <form asp-action="Delete">
         <input type="hidden" asp-for="Id" />
         <input type="submit" value="Eliminar" class="btn btn-danger" /> |

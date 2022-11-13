@@ -5,7 +5,10 @@
 }
 
 <h1>Reserva de Consultorios</h1>
-
+@if (ViewBag.mensaje != null)
+{
+    <h4 class="danger">@ViewBag.mensaje</h4>
+}
 <p>
     <a asp-action="Create">Nueva Reserva</a>
 </p>
@@ -25,22 +28,23 @@
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.HoraInicio)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.NumeroConsultorio)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.NombreEspecialista)
-            </td>
-            <td>
-                <a asp-action="Details" asp-route-id="@item.Id">Ver detalle</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Eliminar</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.HoraInicio)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.NumeroConsultorio)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.NombreEspecialista)
+                </td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@item.Id">Ver detalle</a> |
+                    <a asp-action="Delete" asp-route-id="@item.Id">Eliminar</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>

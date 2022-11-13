@@ -31,6 +31,7 @@ namespace Backend.Controllers
                           .Include(x => x.IdEspecialistaNavigation)
                           .Select(x => new ReservaConsultorioViewModel
                           {
+                              Id = x.Id,
                               IdConsultorio = x.IdConsultorio,
                               IdEquipo = x.IdEquipo,
                               IdEspecialista = x.IdEspecialista,
@@ -74,13 +75,7 @@ namespace Backend.Controllers
             var reservaConsultorioViewModel = new ReservaConsultorioViewModel
             {
                 Id = reservaConsultorio.Id,
-                IdConsultorio = reservaConsultorio.IdConsultorio,
-                IdEquipo =  reservaConsultorio.IdEquipo,
-                IdEspecialista = reservaConsultorio.IdEspecialista,
                 HoraInicio = reservaConsultorio.HoraInicio,
-                HoraFinal = reservaConsultorio.HoraFinal,
-                DiaSemana = reservaConsultorio.DiaSemana,
-                Disponible = reservaConsultorio.Disponible,
                 NombreEquipo = reservaConsultorio.IdEquipoNavigation.Nombre,
                 NombreEspecialista = reservaConsultorio.IdEspecialistaNavigation.Nombre,
                 NumeroConsultorio = reservaConsultorio.IdConsultorioNavigation.Numero.ToString()
@@ -195,8 +190,8 @@ namespace Backend.Controllers
                 var especialistas = await _context.Especialista
                     .Select(x => new
                     {
-                        Id = x.Id,
-                        Nombre = x.Nombre
+                        x.Id,
+                        x.Nombre
                     })
                     .ToListAsync();
                     
@@ -270,6 +265,12 @@ namespace Backend.Controllers
                 })
                 .ToListAsync();
 
+                var nombreEspecialista = await _context.Especialista
+                    .Where(x => x.Id == reservaViewModel.IdEspecialista)
+                    .Select(x => x.Nombre)
+                    .FirstAsync();
+                reservaViewModel.NombreEspecialista = nombreEspecialista;
+
                 reservaViewModel.ListaItems = equipos;
 
                 return View("create4", reservaViewModel);
@@ -329,43 +330,6 @@ namespace Backend.Controllers
             return View(reservaConsultorioViewModel);
         }
 
-        // POST: ReservaConsultorio/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,IdEspecialista,IdConsultorio,HoraInicio,DiaSemana,Disponible")] ReservaConsultorioViewModel reservaConsultorioViewModel)
-        {
-            if (id != reservaConsultorioViewModel.Id)
-            {
-                ViewBag.mensaje = "Reserva no encontrada.";
-                return RedirectToAction(nameof(Index));
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(reservaConsultorioViewModel);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ReservaConsultorioViewModelExists(reservaConsultorioViewModel.Id))
-                    {
-                        ViewBag.mensaje = "Reserva no encontrada.";
-                        return RedirectToAction(nameof(Index));
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(reservaConsultorioViewModel);
-        }
-
         // GET: ReservaConsultorio/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
@@ -375,13 +339,24 @@ namespace Backend.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            var reservaConsultorioViewModel = await _context.ReservaConsultorios
+            var reservaConsultorio = await _context.ReservaConsultorios
+                .Include(x => x.IdConsultorioNavigation)
+                .Include(x => x.IdEspecialistaNavigation)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (reservaConsultorioViewModel == null)
+
+            if (reservaConsultorio == null)
             {
                 ViewBag.mensaje = "Reserva no encontrada.";
                 return RedirectToAction(nameof(Index));
             }
+
+            var reservaConsultorioViewModel = new ReservaConsultorioViewModel
+            {
+                Id = reservaConsultorio.Id,
+                NombreEspecialista = reservaConsultorio.IdEspecialistaNavigation.Nombre,
+                NumeroConsultorio = reservaConsultorio.IdConsultorioNavigation.Numero.ToString(),
+                HoraInicio = reservaConsultorio.HoraInicio
+            };
 
             return View(reservaConsultorioViewModel);
         }

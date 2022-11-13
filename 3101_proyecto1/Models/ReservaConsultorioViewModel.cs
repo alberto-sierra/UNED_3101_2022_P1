@@ -26,6 +26,7 @@ namespace _3101_proyecto1.Models
 
         [Required]
         [Display(Name = "Hora de Inicio")]
+        [DisplayFormat(DataFormatString = "{0:hh':'mm}")]
         public TimeSpan HoraInicio { get; set; }
 
         [Required]
