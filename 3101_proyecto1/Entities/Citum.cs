@@ -19,6 +19,8 @@ namespace _3101_proyecto1.Entities
         [ForeignKey("IdPaciente")]
         [InverseProperty("Cita")]
         public virtual Paciente IdPacienteNavigation { get; set; } = null!;
+        [Column(TypeName = "money")]
+        public decimal PrecioConsulta { get; set; }
         [ForeignKey("IdReserva")]
         [InverseProperty("Cita")]
         public virtual ReservaConsultorio IdReservaNavigation { get; set; } = null!;

@@ -291,6 +291,7 @@ namespace Backend.Controllers
             ModelState.Remove("NombreEquipo");
             ModelState.Remove("NombreEspecialista");
             ModelState.Remove("HoraSeleccionada");
+            ModelState.Remove("NumeroConsultorio");
             if (ModelState.IsValid)
             {
                 var fecha = new DateTime();
@@ -302,7 +303,7 @@ namespace Backend.Controllers
                     HoraInicio = reservaViewModel.HoraInicio,
                     HoraFinal = reservaViewModel.HoraInicio.Add(new TimeSpan(0, 30, 0)),
                     DiaSemana = ((byte)fecha.DayOfWeek),
-                    Disponible = false,
+                    Disponible = true,
                 };
                 _context.Add(reservaConsultorio);
                 await _context.SaveChangesAsync();

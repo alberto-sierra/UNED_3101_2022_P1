@@ -6,13 +6,13 @@ using System.Xml.Linq;
 
 namespace _3101_proyecto1.Api.Models
 {
-    public partial class ConsultorioViewModel
+    public partial class CitaViewModel
     {
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
 
         [Required]
-        [Display(Name = "Número de Consutorio")]
-        public int Numero { get; set; }
+        public long IdPaciente { get; set; }
+
+        [Required]
+        public int IdReserva { get; set; }
     }
 }
