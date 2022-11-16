@@ -28,8 +28,8 @@ namespace Backend.Controllers
                               Id = x.Id,
                               IdPaciente = x.IdPaciente,
                               IdReserva = x.IdReserva,
-                              Fecha = x.Fecha,
-                              HoraInicio = x.HoraInicio
+                              PrecioConsulta = x.PrecioConsulta,
+                              Fecha = x.Fecha
                           })
                           .ToListAsync()) :
                           Problem("Entity set 'citasContext.Citum'  is null.");

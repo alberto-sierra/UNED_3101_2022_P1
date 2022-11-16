@@ -97,11 +97,12 @@ public class CitaController : ControllerBase
                 HoraInicio = x.IdReservaNavigation.HoraInicio,
                 Especialidad = x.IdReservaNavigation.IdEspecialistaNavigation.IdEspecialidadNavigation.Nombre,
                 PrecioConsulta = x.IdReservaNavigation.IdEspecialistaNavigation.PrecioConsulta
-            });
+            })
+            .SingleOrDefault();
 
         if (citumViewModel == null)
         {
-            return Ok(new object[] { new CitumViewModel { } });
+            return Ok(new CitumViewModel { });
         }
 
         return Ok(citumViewModel);
@@ -196,8 +197,9 @@ public class CitaController : ControllerBase
                 {
                     IdPaciente = citaViewModel.IdPaciente,
                     IdReserva = citaViewModel.IdReserva,
-                    PrecioConsulta = reserva.IdEspecialistaNavigation.PrecioConsulta
-                };
+                    PrecioConsulta = reserva.IdEspecialistaNavigation.PrecioConsulta,
+                    Fecha = DateTime.Today + reserva.HoraInicio
+            };
 
                 reserva.Disponible = false;
                 _context.Add(nuevaCita);
@@ -247,7 +249,19 @@ public class CitaController : ControllerBase
                 return Ok(new { deleted = 0 });
             }
 
-            return Ok(new { deleted = 1 });
+            var reserva = _context.ReservaConsultorios
+                .FirstOrDefault(m => m.Id == citumViewModel.IdReserva);
+
+            if (reserva == null)
+            {
+                return BadRequest(new { error = "No existe profesional asignado a la cita" });
+            }
+
+            reserva.Disponible = true;
+            _context.ReservaConsultorios.Update(reserva);
+            _context.Cita.Remove(citumViewModel);
+            _context.SaveChangesAsync();
+            return Ok(new { deleted = citumViewModel.Id });
         }
     }
 

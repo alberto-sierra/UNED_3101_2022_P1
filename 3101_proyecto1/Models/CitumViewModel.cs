@@ -20,5 +20,10 @@ namespace _3101_proyecto1.Models
         [Required]
         [Display(Name = "Hora de Inicio")]
         public TimeSpan HoraInicio { get; set; }
+
+        [Column(TypeName = "money")]
+        [Display(Name = "Precio de la Consulta")]
+        public decimal PrecioConsulta { get; set; }
+
     }
 }

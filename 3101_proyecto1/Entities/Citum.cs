@@ -12,15 +12,14 @@ namespace _3101_proyecto1.Entities
         public int Id { get; set; }
         public long IdPaciente { get; set; }
         public int IdReserva { get; set; }
-        [Column(TypeName = "date")]
+        [Column(TypeName = "money")]
+        public decimal PrecioConsulta { get; set; }
+        [Column(TypeName = "datetime")]
         public DateTime Fecha { get; set; }
-        public TimeSpan HoraInicio { get; set; }
 
         [ForeignKey("IdPaciente")]
         [InverseProperty("Cita")]
         public virtual Paciente IdPacienteNavigation { get; set; } = null!;
-        [Column(TypeName = "money")]
-        public decimal PrecioConsulta { get; set; }
         [ForeignKey("IdReserva")]
         [InverseProperty("Cita")]
         public virtual ReservaConsultorio IdReservaNavigation { get; set; } = null!;

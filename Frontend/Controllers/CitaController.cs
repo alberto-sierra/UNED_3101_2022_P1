@@ -25,6 +25,11 @@ namespace Frontend.Controllers
         // GET: Cita
         public ActionResult Index()
         {
+            if (TempData.ContainsKey("mensaje"))
+            {
+                ViewBag.mensaje = TempData["mensaje"].ToString();
+            }
+            
             return View();
         }
 
@@ -56,7 +61,7 @@ namespace Frontend.Controllers
             }
             catch
             {
-                ViewBag.mensaje = "Error de comunicación con el API.";
+                TempData["mensaje"] = "Error de comunicación con el API.";
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -71,8 +76,8 @@ namespace Frontend.Controllers
         [HttpGet]
         public IActionResult Create([Bind("Id")]int? id)
         {
-            //try
-            //{
+            try
+            {
                 HttpClient client = new HttpClient();
                 var response = client.GetAsync(apiUrl + "/Cita").Result;
                 if (response.StatusCode == HttpStatusCode.OK)
@@ -81,7 +86,7 @@ namespace Frontend.Controllers
                     var citumViewModelList = JsonConvert.DeserializeObject<List<CitumViewModel>>(responseString);
                     if (citumViewModelList == null || citumViewModelList.Count == 0)
                     {
-                        ViewBag.mensaje = "No hay disponibilidad para nuevas citas.";
+                        TempData["mensaje"] = "No hay disponibilidad para nuevas citas.";
                         return RedirectToAction(nameof(Index));
                     }
 
@@ -106,13 +111,13 @@ namespace Frontend.Controllers
                 }
 
                 throw new Exception();
-            //}
-            //catch
-            //{
-            //    ViewBag.mensaje = "Error de comunicación con el API.";
-            //    return RedirectToAction(nameof(Index));
-            //}
         }
+            catch
+            {
+                TempData["mensaje"] = "Error de comunicación con el API.";
+                return RedirectToAction(nameof(Index));
+    }
+}
 
         // POST: Cita/Create2
         [HttpPost]
@@ -129,7 +134,7 @@ namespace Frontend.Controllers
                     var citumViewModelList = JsonConvert.DeserializeObject<List<CitumViewModel>>(responseString);
                     if (citumViewModelList == null || citumViewModelList.Count == 0)
                     {
-                        ViewBag.mensaje = "No hay disponibilidad para nuevas citas.";
+                        TempData["mensaje"] = "No hay disponibilidad para nuevas citas.";
                         return RedirectToAction(nameof(Index));
                     }
 
@@ -151,7 +156,7 @@ namespace Frontend.Controllers
             }
             catch
             {
-                ViewBag.mensaje = "Error de comunicación con el API.";
+                TempData["mensaje"] = "Error de comunicación con el API.";
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -171,7 +176,7 @@ namespace Frontend.Controllers
                     var citumViewModelList = JsonConvert.DeserializeObject<List<CitumViewModel>>(responseString);
                     if (citumViewModelList == null || citumViewModelList.Count == 0)
                     {
-                        ViewBag.mensaje = "No hay disponibilidad para nuevas citas.";
+                        TempData["mensaje"] = "No hay disponibilidad para nuevas citas.";
                         return RedirectToAction(nameof(Index));
                     }
 
@@ -180,13 +185,21 @@ namespace Frontend.Controllers
                         && x.IdEspecialidad == citumViewModel.IdEspecialidad)
                         .Select(x => new SelectListItem
                         {
-                            Value = x.IdEspecialista.ToString(),
+                            Value = x.IdReserva.ToString(),
                             Text = x.NombreEspecialista
                         })
                         .DistinctBy(x => x.Value)
                         .ToList();
 
+                    var especialidad = citumViewModelList
+                        .Where(x => x.HoraInicio == citumViewModel.HoraInicio
+                        && x.IdEspecialidad == citumViewModel.IdEspecialidad)
+                        .DistinctBy(x => x.Especialidad)
+                        .Select(x => x.Especialidad)
+                        .First();
+
                     citumViewModel.ListaItems = listaItems;
+                    citumViewModel.Especialidad = especialidad;
                     return View(citumViewModel);
                 }
 
@@ -194,7 +207,7 @@ namespace Frontend.Controllers
             }
             catch
             {
-                ViewBag.mensaje = "Error de comunicación con el API.";
+                TempData["mensaje"] = "Error de comunicación con el API.";
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -214,7 +227,7 @@ namespace Frontend.Controllers
                     var citumViewModelList = JsonConvert.DeserializeObject<CitumViewModel>(responseString);
                     if (citumViewModelList == null)
                     {
-                        ViewBag.mensaje = "Cita registrada con éxito.";
+                        TempData["mensaje"] = "Cita registrada con éxito.";
                         return RedirectToAction(nameof(Index));
                     }
 
@@ -225,38 +238,38 @@ namespace Frontend.Controllers
             }
             catch
             {
-                ViewBag.mensaje = "Error de comunicación con el API.";
+                TempData["mensaje"] = "Error de comunicación con el API.";
                 return RedirectToAction(nameof(Index));
-            }
-        }
-
-        // GET: Cita/Edit/5
-        public ActionResult Edit(int id)
-        {
-            return View();
-        }
-
-        // POST: Cita/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
-        {
-            try
-            {
-                // TODO: Add update logic here
-
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
             }
         }
 
         // GET: Cita/Delete/5
         public ActionResult Delete(int id)
         {
-            return View();
+            try
+            {
+                HttpClient client = new HttpClient();
+                var response = client.GetAsync(apiUrl + "/Cita/" + id).Result;
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    var responseString = response.Content.ReadAsStringAsync().Result;
+                    var citumViewModel = JsonConvert.DeserializeObject<CitumViewModel>(responseString);
+                    if (citumViewModel == null)
+                    {
+                        ViewBag.error = "Cita no existe.";
+                        return View();
+                    }
+
+                    return View(citumViewModel);
+                }
+
+                throw new Exception();
+            }
+            catch
+            {
+                ViewBag.error = "Error de comunicación con el API.";
+                return View();
+            }
         }
 
         // POST: Cita/Delete/5
@@ -266,13 +279,22 @@ namespace Frontend.Controllers
         {
             try
             {
-                // TODO: Add delete logic here
+                HttpClient client = new HttpClient();
+                var response = client.DeleteAsync(apiUrl + "/Cita/" + id).Result;
 
-                return RedirectToAction(nameof(Index));
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    var responseString = response.Content.ReadAsStringAsync().Result;
+                    var deleteStatus = JsonConvert.DeserializeObject(responseString);
+                    TempData["mensaje"] = "Cita eliminada con éxito.";
+                    return RedirectToAction(nameof(Index));
+                }
+                throw new Exception();
             }
             catch
             {
-                return View();
+                TempData["mensaje"] = "Error de borrado. Verifique la existencia de la cita.";
+                return RedirectToAction(nameof(Index));
             }
         }
     }
