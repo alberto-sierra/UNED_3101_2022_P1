@@ -10,9 +10,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Frontend", "Frontend\Frontend.csproj", "{4B808922-EE49-441F-93F2-39BF67726807}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B94361A7-37B5-4783-AFB6-69AD2989085F}"
-	ProjectSection(SolutionItems) = preProject
-		ReporteConsultorioViewModel.cs = ReporteConsultorioViewModel.cs
-	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
