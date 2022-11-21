@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using _3101_proyecto1.FrontEnd.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -16,10 +17,11 @@ namespace Frontend.Controllers
 {
     public class CitaController : Controller
     {
-        private readonly string apiUrl = "http://localhost:34521";
+        private readonly IConfiguration _config;
 
-        public CitaController()
+        public CitaController(IConfiguration configuration)
         {
+            _config = configuration;
         }
 
         // GET: Cita
@@ -41,7 +43,7 @@ namespace Frontend.Controllers
             try
             {
                 HttpClient client = new HttpClient();
-                var response = client.GetAsync(apiUrl + "/Cita/GetAllByDoc/" + identificacion).Result;
+                var response = client.GetAsync(_config["ApiURL"] + "/Cita/GetAllByDoc/" + identificacion).Result;
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
                     var responseString = response.Content.ReadAsStringAsync().Result;
@@ -79,7 +81,7 @@ namespace Frontend.Controllers
             try
             {
                 HttpClient client = new HttpClient();
-                var response = client.GetAsync(apiUrl + "/Cita").Result;
+                var response = client.GetAsync(_config["ApiURL"] + "/Cita").Result;
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
                     var responseString = response.Content.ReadAsStringAsync().Result;
@@ -127,7 +129,7 @@ namespace Frontend.Controllers
             try
             {
                 HttpClient client = new HttpClient();
-                var response = client.GetAsync(apiUrl + "/Cita").Result;
+                var response = client.GetAsync(_config["ApiURL"] + "/Cita").Result;
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
                     var responseString = response.Content.ReadAsStringAsync().Result;
@@ -169,7 +171,7 @@ namespace Frontend.Controllers
             try
             {
                 HttpClient client = new HttpClient();
-                var response = client.GetAsync(apiUrl + "/Cita").Result;
+                var response = client.GetAsync(_config["ApiURL"] + "/Cita").Result;
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
                     var responseString = response.Content.ReadAsStringAsync().Result;
@@ -220,7 +222,7 @@ namespace Frontend.Controllers
             try
             {
                 HttpClient client = new HttpClient();
-                var response = client.PostAsJsonAsync<CitumViewModel>(apiUrl + "/Cita",citumViewModel).Result;
+                var response = client.PostAsJsonAsync<CitumViewModel>(_config["ApiURL"] + "/Cita",citumViewModel).Result;
                 if (response.StatusCode == HttpStatusCode.Created)
                 {
                     var responseString = response.Content.ReadAsStringAsync().Result;
@@ -249,7 +251,7 @@ namespace Frontend.Controllers
             try
             {
                 HttpClient client = new HttpClient();
-                var response = client.GetAsync(apiUrl + "/Cita/" + id).Result;
+                var response = client.GetAsync(_config["ApiURL"] + "/Cita/" + id).Result;
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
                     var responseString = response.Content.ReadAsStringAsync().Result;
@@ -280,7 +282,7 @@ namespace Frontend.Controllers
             try
             {
                 HttpClient client = new HttpClient();
-                var response = client.DeleteAsync(apiUrl + "/Cita/" + id).Result;
+                var response = client.DeleteAsync(_config["ApiURL"] + "/Cita/" + id).Result;
 
                 if (response.StatusCode == HttpStatusCode.OK)
                 {

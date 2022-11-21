@@ -48,12 +48,12 @@ public class CitaController : ControllerBase
             Id = x.Id,
             IdPaciente = x.IdPaciente,
             IdReserva = x.IdReserva,
-            HoraInicio = x.IdReservaNavigation.HoraInicio,
+            HoraInicio = x.Fecha.TimeOfDay,
             NombreEspecialista = x.IdReservaNavigation.IdEspecialistaNavigation.Nombre,
             IdEspecialista = x.IdReservaNavigation.IdEspecialista,
             NombrePaciente = x.IdPacienteNavigation.NombreCompleto,
             Especialidad = x.IdReservaNavigation.IdEspecialistaNavigation.IdEspecialidadNavigation.Nombre,
-            PrecioConsulta = x.IdReservaNavigation.IdEspecialistaNavigation.PrecioConsulta
+            PrecioConsulta = x.PrecioConsulta
         })
         .ToList();
 
@@ -94,7 +94,7 @@ public class CitaController : ControllerBase
                 NombrePaciente = x.IdPacienteNavigation.NombreCompleto,
                 NombreEspecialista = x.IdReservaNavigation.IdEspecialistaNavigation.Nombre,
                 IdEspecialista = x.IdReservaNavigation.IdEspecialista,
-                HoraInicio = x.IdReservaNavigation.HoraInicio,
+                HoraInicio = x.Fecha.TimeOfDay,
                 Especialidad = x.IdReservaNavigation.IdEspecialistaNavigation.IdEspecialidadNavigation.Nombre,
                 PrecioConsulta = x.IdReservaNavigation.IdEspecialistaNavigation.PrecioConsulta
             })
@@ -199,7 +199,7 @@ public class CitaController : ControllerBase
                     IdReserva = citaViewModel.IdReserva,
                     PrecioConsulta = reserva.IdEspecialistaNavigation.PrecioConsulta,
                     Fecha = DateTime.Today + reserva.HoraInicio
-            };
+                };
 
                 reserva.Disponible = false;
                 _context.Add(nuevaCita);
