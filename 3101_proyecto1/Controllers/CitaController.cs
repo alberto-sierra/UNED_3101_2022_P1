@@ -22,17 +22,17 @@ namespace Backend.Controllers
         // GET: Cita
         public async Task<IActionResult> Index()
         {
-              return _context.Cita != null ? 
-                          View(await _context.Cita.Select(x => new CitumViewModel
-                          {
-                              Id = x.Id,
-                              IdPaciente = x.IdPaciente,
-                              IdReserva = x.IdReserva,
-                              PrecioConsulta = x.PrecioConsulta,
-                              Fecha = x.Fecha
-                          })
-                          .ToListAsync()) :
-                          Problem("Entity set 'citasContext.Citum'  is null.");
+            return _context.Cita != null ?
+                        View(await _context.Cita.Select(x => new CitumViewModel
+                        {
+                            Id = x.Id,
+                            IdPaciente = x.IdPaciente,
+                            IdReserva = x.IdReserva,
+                            PrecioConsulta = x.PrecioConsulta,
+                            Fecha = x.Fecha
+                        })
+                        .ToListAsync()) :
+                        Problem("Entity set 'citasContext.Citum'  is null.");
         }
 
         // GET: Cita/Details/5
@@ -158,14 +158,16 @@ namespace Backend.Controllers
             {
                 _context.Cita.Remove(citumViewModel);
             }
-            
+
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool CitumViewModelExists(int id)
         {
-          return (_context.Cita?.Any(e => e.Id == id)).GetValueOrDefault();
+            return (_context.Cita?.Any(e => e.Id == id)).GetValueOrDefault();
         }
+
+        
     }
 }
